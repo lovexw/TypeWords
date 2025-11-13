@@ -206,19 +206,24 @@ watch(() => settingStore.wordPracticeType, (n) => {
   }
 }, {immediate: true})
 
+const groupSize = 7
+
 function wordLoop() {
-  // return data.index++
-  let d = Math.floor(data.index / 6) - 1
-  if (data.index > 0 && data.index % 6 === (d < 0 ? 0 : d)) {
-    if (settingStore.wordPracticeType === WordPracticeType.FollowWrite) {
+  // 学习模式
+  if (settingStore.wordPracticeType === WordPracticeType.FollowWrite) {
+    data.index++
+    // 到达一个组末尾，就切换到拼写模式
+    if (data.index % groupSize === 0) {
       settingStore.wordPracticeType = WordPracticeType.Spell
-      data.index -= 6
-    } else {
-      settingStore.wordPracticeType = WordPracticeType.FollowWrite
-      data.index++
+      data.index -= groupSize // 回到刚学单词开头
     }
   } else {
+    // 拼写模式
     data.index++
+    // 拼写走完一组，切回跟写模式
+    if (data.index % groupSize === 0) {
+      settingStore.wordPracticeType = WordPracticeType.FollowWrite
+    }
   }
 }
 
@@ -268,19 +273,8 @@ async function next(isTyping: boolean = true) {
     if (data.index === data.words.length - 1) {
       if (statStore.step === 0 || isTypingWrongWord.value) {
         if (settingStore.wordPracticeType !== WordPracticeType.Spell) {
-          let i = data.index
-          i--
-          let d = Math.floor(i / 6) - 1
-          while (i % 6 !== (d < 0 ? 0 : d)) {
-            i--
-            d = Math.floor(i / 6) - 1
-          }
-          console.log('i', i)
-          if (i <= 0) i = -1
-          if (i + 1 == data.index) {
-            data.index = 0
-          }
-          data.index = i + 1
+          //回到最后一组的开始位置
+          data.index = Math.floor(data.index / groupSize) * groupSize
           emitter.emit(EventKey.resetWord)
           settingStore.wordPracticeType = WordPracticeType.Spell
           return
