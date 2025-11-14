@@ -23,6 +23,7 @@ export interface User {
     active: boolean,
     endDate: number,
     autoRenew: boolean,
+    plan: string,
   }
 }
 

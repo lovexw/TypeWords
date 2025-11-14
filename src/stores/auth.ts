@@ -1,17 +1,16 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { getUserInfo, User } from '@/apis/user.ts'
-import Toast from '@/components/base/toast/Toast.ts'
-import router from '@/router.ts'
 import { AppEnv } from "@/config/env.ts";
-
+import Toast from "@/components/base/toast/Toast.ts";
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
-  const isLogin = computed(() => AppEnv.IS_LOGIN)
+  const isLogin = ref<boolean>(false)
 
   // 设置token
   const setToken = (newToken: string) => {
+    isLogin.value = true
     AppEnv.TOKEN = newToken
     AppEnv.IS_LOGIN = !!AppEnv.TOKEN
     AppEnv.CAN_REQUEST = AppEnv.IS_LOGIN && AppEnv.IS_OFFICIAL
@@ -23,18 +22,20 @@ export const useUserStore = defineStore('user', () => {
     AppEnv.IS_LOGIN = AppEnv.CAN_REQUEST = false
     AppEnv.TOKEN = ''
     localStorage.removeItem('token')
+    isLogin.value = false
     user.value = null
   }
 
   // 设置用户信息
   const setUser = (userInfo: User) => {
     user.value = userInfo
+    isLogin.value = true
   }
 
   // 登出
   function logout() {
     clearToken()
-    // Toast.success('已退出登录')
+    Toast.success('已退出登录')
     //这行会引起hrm失效
     // router.push('/')
   }

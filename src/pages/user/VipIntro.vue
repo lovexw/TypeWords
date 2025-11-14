@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import BasePage from '@/components/BasePage.vue'
 import BaseButton from '@/components/BaseButton.vue'
-import {useRouter} from 'vue-router'
-import {useUserStore} from '@/stores/auth.ts'
-import {User} from "@/apis/user.ts";
-import {onMounted} from "vue";
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/auth.ts'
+import { User } from "@/apis/user.ts";
+import { computed, onMounted, ref } from "vue";
 import Header from "@/components/Header.vue";
-import {LevelBenefits, levelBenefits} from "@/apis/member.ts";
+import { LevelBenefits, levelBenefits } from "@/apis/member.ts";
+import Radio from "@/components/base/radio/Radio.vue";
+import RadioGroup from "@/components/base/radio/RadioGroup.vue";
+import { APP_NAME } from "@/config/env.ts";
+import Toast from "@/components/base/toast/Toast.ts";
+import { _dateFormat, _nextTick } from "@/utils";
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -16,13 +21,13 @@ interface Plan {
   name: string
   price: number
   unit: '月' | '年'
-  desc: string
   highlight?: string
   autoRenew?: boolean
-  features: string[]
 }
 
 
+let selectedPaymentMethod = $ref('wechat')
+let selectedSubscribePlan = $ref(undefined)
 const member = $computed<User['member']>(() => userStore.user?.member ?? {} as any)
 
 const memberEndDate = $computed(() => {
@@ -30,50 +35,7 @@ const memberEndDate = $computed(() => {
   return member?.endDate
 })
 
-// Get current plan info
-const currentPlan = $computed(() => {
-  if (!member?.active) return null
-  return plans.find(p => p.id === member.planId) || null
-})
-
-// Toggle auto-renewal
-function toggleAutoRenew() {
-  // TODO: Implement API call to toggle auto-renewal
-  console.log('Toggle auto-renewal:', !member.autoRenew)
-}
-
-
-// Get button text based on current plan
-function getPlanButtonText(plan: Plan) {
-  if (!member?.active) return '选择'
-  if (plan.id === currentPlan?.id) return '当前计划'
-
-  // Compare prices to determine upgrade/downgrade
-  if (plan.price > (currentPlan?.price || 0)) return '升级'
-  return '降级'
-}
-
-function goPurchase(plan: Plan) {
-  return router.push('/pay')
-
-  if (!userStore.isLogin) {
-    router.push({path: '/login', query: {redirect: '/vip'}})
-    return
-  }
-
-  if (plan.id === currentPlan?.id) return
-
-  router.push('/user')
-}
-
 let data = $ref<LevelBenefits>({} as any)
-onMounted(async () => {
-  let res = await levelBenefits({levelCode: 'basic'})
-  if (res.success) {
-    data = res.data
-  }
-})
-
 const plans: Plan[] = $computed(() => {
   let list = []
   if (data?.level) {
@@ -82,19 +44,17 @@ const plans: Plan[] = $computed(() => {
       name: '月付',
       price: data.level.price,
       unit: '月',
-      desc: '',
     },)
     list.push({
       id: 'monthly-auto',
       name: '连续包月',
       price: data.level.price_auto,
       unit: '月',
-      desc: '',
       highlight: '性价比更高',
       autoRenew: true,
     },)
     list.push({
-      id: 'monthly',
+      id: 'year',
       name: '年度会员',
       price: data.level.yearly_price,
       unit: '年',
@@ -103,6 +63,60 @@ const plans: Plan[] = $computed(() => {
   }
   return list
 })
+
+const currentPlan = $computed(() => {
+  return plans.find(v => v.id === selectedSubscribePlan) ?? null
+})
+
+onMounted(async () => {
+  let res = await levelBenefits({levelCode: 'basic'})
+  if (res.success) {
+    data = res.data
+  }
+})
+
+// Toggle auto-renewal
+function toggleAutoRenew() {
+  // TODO: Implement API call to toggle auto-renewal
+  console.log('Toggle auto-renewal:', !member.autoRenew)
+}
+
+// Get button text based on current plan
+function getPlanButtonText(plan: Plan) {
+  if (plan.id === selectedSubscribePlan) return '当前计划'
+  if (!member?.active) return '选择'
+}
+
+function goPurchase(plan: Plan) {
+  if (!userStore.isLogin) {
+    router.push({path: '/login', query: {redirect: '/vip'}})
+    return
+  }
+  selectedSubscribePlan = plan.id
+  _nextTick(() => {
+    let el = document.getElementById('pay')
+    el.scrollIntoView({behavior: "smooth"})
+  })
+}
+
+// Payment methods - WeChat and Alipay
+const paymentMethods = [
+  {
+    id: 'wechat',
+    name: '微信支付',
+    description: '使用微信支付'
+  },
+  {
+    id: 'alipay',
+    name: '支付宝',
+    description: '使用支付宝支付'
+  }
+]
+
+
+function handlePayment() {
+  console.log('Processing payment with:', selectedPaymentMethod)
+}
 
 </script>
 
@@ -115,14 +129,17 @@ const plans: Plan[] = $computed(() => {
           <div>
             <div class="text-lg flex items-center" v-for="f in data.benefits" :key="f.name">
               <IconFluentCheckmarkCircle20Regular class="mr-2 text-green-600"/>
-              <span>{{ f.name }}</span>
+              <span>
+               <span>{{ f.name }}</span>
+                <span v-if="f.value !== 'true'">{{ `(${f.value}${f.unit ?? ''})`}}</span>
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="flex justify-between">
-        <div class="title">选择会员级别并立即开始试用。您可以随时升级、降级或取消。</div>
+        <div class="title">选择适合您的套餐</div>
         <div class="subtitle">三种方案，按需选择</div>
       </div>
 
@@ -136,7 +153,6 @@ const plans: Plan[] = $computed(() => {
                 <span class="amount">¥{{ p.price }}</span>
                 <span class="unit">/ 每{{ p.unit }}</span>
               </div>
-              <div class="desc">{{ p.desc }}</div>
               <div v-if="p.highlight" class="tag">{{ p.highlight }}</div>
             </div>
             <div v-if="p.autoRenew" class="text-sm flex items-center mt-4">
@@ -144,11 +160,10 @@ const plans: Plan[] = $computed(() => {
               开启自动续费，可随时关闭
             </div>
             <BaseButton
-              class="w-full mt-4"
-              size="large"
-              :type="p.id === currentPlan?.id ? 'primary' : 'info'"
-              :disabled="p.id === currentPlan?.id"
-              @click="goPurchase(p)">
+                class="w-full mt-4"
+                size="large"
+                :type="p.id === selectedSubscribePlan ? 'primary' : 'info'"
+                @click="goPurchase(p)">
               {{ getPlanButtonText(p) }}
             </BaseButton>
           </div>
@@ -174,13 +189,83 @@ const plans: Plan[] = $computed(() => {
                 <span>自动续费已开启</span>
               </div>
               <BaseButton
-                size="small"
-                type="info"
-                @click="toggleAutoRenew">
+                  size="small"
+                  type="info"
+                  @click="toggleAutoRenew">
                 关闭
               </BaseButton>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pay" class="mb-50" v-if="member?.plan !== selectedSubscribePlan">
+      <!-- Page Header -->
+      <div class="text-center mb-6">
+        <h1 class="text-xl font-semibold mb-2">安全支付</h1>
+        <p class="">选择支付方式完成订单</p>
+      </div>
+
+      <!-- Main Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Left Card: Payment Method Selection -->
+        <div class="card bg-white shadow-lg">
+          <div class="text-lg font-medium mb-4">选择支付方式</div>
+          <RadioGroup v-model="selectedPaymentMethod">
+            <div class="space-y-3 w-full">
+              <div
+                  v-for="method in paymentMethods"
+                  :key="method.id"
+                  @click=" selectedPaymentMethod = method.id"
+                  class="flex p-4 border rounded-lg cp transition-all duration-200"
+                  :class="[
+                  selectedPaymentMethod === method.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                <div class="flex items-center flex-1 gap-2">
+                  <IconSimpleIconsWechat class="text-xl"/>
+                  <div>
+                    <div class="font-medium">{{ method.name }}</div>
+                    <div class="text-sm text-gray-500">{{ method.description }}</div>
+                  </div>
+                </div>
+                <Radio :value="method.id" label=""></Radio>
+              </div>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <!-- Right Card: Order Summary -->
+        <div class="card bg-white shadow-lg">
+          <div class="text-lg font-semibold mb-4">订单概要</div>
+
+          <!-- Plan Info -->
+          <div class="mb-4">
+            <div class="text-purple-600 text-sm mb-2">付费方案（{{ currentPlan.name }}）订阅</div>
+            <div class="text-gray-900 mb-4">
+              从 {{ _dateFormat(Date.now()) }} 开始:
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div class="flex items-baseline mb-4">
+            <span class="text-3xl font-semibold text-gray-900">￥{{ currentPlan.price }}</span>
+            <span class="text-gray-600 ml-2">/ {{ currentPlan.unit }}</span>
+          </div>
+
+          <!-- Payment Button -->
+          <BaseButton
+              class="w-full"
+              size="large"
+              :type="!!selectedPaymentMethod ? 'primary' : 'info'"
+              :disabled="!selectedPaymentMethod"
+              @click="handlePayment"
+          >
+            付款
+          </BaseButton>
         </div>
       </div>
     </div>
