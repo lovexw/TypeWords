@@ -6,6 +6,7 @@ import ArticlesPage from "@/pages/article/ArticlesPage.vue";
 import PracticeArticles from "@/pages/article/PracticeArticles.vue";
 import DictDetail from "@/pages/word/DictDetail.vue";
 import PracticeWords from "@/pages/word/PracticeWords.vue";
+import WordTest from "@/pages/word/WordTest.vue";
 import BookDetail from "@/pages/article/BookDetail.vue";
 import DictList from "@/pages/word/DictList.vue";
 import BookList from "@/pages/article/BookList.vue";
@@ -24,6 +25,7 @@ export const routes: RouteRecordRaw[] = [
       {path: 'words', component: WordsPage},
       {path: 'word', redirect: '/words'},
       {path: 'practice-words/:id', component: PracticeWords},
+      {path: 'word-test/:id', component: WordTest},
       {path: 'study-word', redirect: '/words'},
       {path: 'dict-list', component: DictList},
       {path: 'dict-detail', component: DictDetail},

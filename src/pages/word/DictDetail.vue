@@ -256,6 +256,17 @@ async function addMyStudyList() {
   startPractice()
 }
 
+async function startTest() {
+  if (!runtimeStore.editDict.words.length) {
+    loading = true
+    let r = await _getDictDataByUrl(runtimeStore.editDict)
+    runtimeStore.editDict = r
+    loading = false
+  }
+  await base.changeDict(runtimeStore.editDict)
+  nav('word-test/' + store.sdict.id, {})
+}
+
 let exportLoading = $ref(false)
 let importLoading = $ref(false)
 let tableRef = ref()
@@ -388,6 +399,7 @@ defineRender(() => {
                     <BaseButton loading={studyLoading || loading} type="info"
                                 onClick={() => isEdit = true}>编辑</BaseButton>
                     <BaseButton loading={studyLoading || loading} onClick={addMyStudyList}>学习</BaseButton>
+                    <BaseButton loading={studyLoading || loading} onClick={startTest}>测试</BaseButton>
                   </div>
                 </div>
                 <div class="text-lg  ">介绍：{runtimeStore.editDict.description}</div>
