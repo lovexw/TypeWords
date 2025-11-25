@@ -7,6 +7,7 @@ import {useRouter} from "vue-router";
 import useTheme from "@/hooks/theme.ts";
 import BaseIcon from "@/components/BaseIcon.vue";
 import {useRuntimeStore} from "@/stores/runtime.ts";
+import { jump2Feedback } from "@/utils";
 
 const settingStore = useSettingStore()
 const runtimeStore = useRuntimeStore()
@@ -16,9 +17,6 @@ const {toggleTheme, getTheme} = useTheme()
 //首页为了seo被剥离出去了，现在是一个静态页面，用nginx 重定向控制对应的跳转
 function goHome() {
   window.location.href = '/';
-}
-function goFeedback() {
-  window.open('https://v.wjx.cn/vm/ev0W7fv.aspx#', '_blank');
 }
 </script>
 
@@ -47,14 +45,14 @@ function goFeedback() {
           <span v-if="settingStore.sideExpand">设置</span>
           <div class="red-point" :class="!settingStore.sideExpand && 'top-1 right-0'" v-if="runtimeStore.isNew"></div>
         </div>
-        <div class="row" @click="goFeedback">
+        <div class="row" @click="jump2Feedback">
           <IconFluentCommentEdit20Regular/>
           <span v-if="settingStore.sideExpand">建议反馈</span>
         </div>
-<!--        <div class="row" @click="router.push('/user')">-->
-<!--          <IconFluentPerson20Regular/>-->
-<!--          <span v-if="settingStore.sideExpand">用户</span>-->
-<!--        </div>-->
+        <div class="row" @click="router.push('/user')">
+          <IconFluentPerson20Regular/>
+          <span v-if="settingStore.sideExpand">用户</span>
+        </div>
       </div>
       <div class="bottom flex justify-evenly ">
         <BaseIcon

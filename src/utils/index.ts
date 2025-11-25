@@ -459,3 +459,7 @@ export async function isNewUser() {
   console.log(JSON.stringify(getDefaultBaseState()))
   return JSON.stringify(base.$state) === JSON.stringify({...getDefaultBaseState(), ...{load: true}})
 }
+
+export function jump2Feedback(){
+  window.open('https://v.wjx.cn/vm/ev0W7fv.aspx#', '_blank');
+}
