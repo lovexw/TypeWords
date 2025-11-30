@@ -1,6 +1,6 @@
-import {onMounted, watchEffect} from "vue"
-import {useSettingStore} from "@/stores/setting.ts";
-import {PronunciationApi} from "@/types/types.ts";
+import { onMounted, watchEffect } from "vue"
+import { useSettingStore } from "@/stores/setting.ts";
+import { PronunciationApi } from "@/types/types.ts";
 
 import { SoundFileOptions } from "@/config/env.ts";
 
@@ -89,6 +89,7 @@ export function usePlayWordAudio() {
   const audio = $ref(new Audio())
 
   function playAudio(word: string) {
+    if (!word) return
     let url = `${PronunciationApi}${word}&type=2`
     if (settingStore.soundType === 'uk') {
       url = `${PronunciationApi}${word}&type=1`

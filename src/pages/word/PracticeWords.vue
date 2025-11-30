@@ -128,7 +128,7 @@ watchOnce(() => data.words.length, (newVal, oldVal) => {
         buttons: [
           {
             text: `下一步（5/${TourConfig.total}）`,
-            action:tour.next
+            action: tour.next
           }
         ]
       });
@@ -140,7 +140,7 @@ watchOnce(() => data.words.length, (newVal, oldVal) => {
         buttons: [
           {
             text: `下一步（6/${TourConfig.total}）`,
-            action(){
+            action() {
               tour.next()
               router.push('/articles')
             }
@@ -313,7 +313,7 @@ async function next(isTyping: boolean = true) {
       } else {
         console.log('自由模式，全完学完了')
         showStatDialog = true
-        localStorage.removeItem(PracticeSaveWordKey.key)
+        setTimeout(() => localStorage.removeItem(PracticeSaveWordKey.key), 300)
       }
     } else {
       data.index++
@@ -345,7 +345,7 @@ async function next(isTyping: boolean = true) {
           statStore.spend = Date.now() - statStore.startDate
           console.log('全完学完了')
           showStatDialog = true
-          localStorage.removeItem(PracticeSaveWordKey.key)
+          setTimeout(() => localStorage.removeItem(PracticeSaveWordKey.key), 300)
           return;
         }
 

@@ -665,8 +665,12 @@ provide('currentPractice', currentPractice)
         flex-direction: column;
         align-items: center;
         gap: .3rem;
-        width: 6rem;
         color: gray;
+
+        .num,.name{
+          word-break: keep-all;
+          padding: 0 .4rem;
+        }
 
         .line {
           height: 1px;

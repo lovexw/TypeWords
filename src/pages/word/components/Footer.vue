@@ -111,15 +111,15 @@ const progress = $computed(() => {
             <div class="line"></div>
             <div class="name">单词总数</div>
           </div>
-          <div class="row">
-            <div class="num">{{ format(statStore.inputWordNumber, '', 0) }}</div>
-            <div class="line"></div>
-            <div class="name">总输入数</div>
-          </div>
+<!--          <div class="row">-->
+<!--            <div class="num">{{ format(statStore.inputWordNumber, '', 0) }}</div>-->
+<!--            <div class="line"></div>-->
+<!--            <div class="name">总输入数</div>-->
+<!--          </div>-->
           <div class="row">
             <div class="num">{{ format(statStore.wrong, '', 0) }}</div>
             <div class="line"></div>
-            <div class="name">总错误数</div>
+            <div class="name">错误数</div>
           </div>
         </div>
         <div class="flex gap-2 justify-center items-center" id="toolbar-icons">

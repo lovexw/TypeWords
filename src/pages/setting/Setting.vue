@@ -619,6 +619,14 @@ function transferOk() {
               <div class="mb-2">
                 <div>
                   <div>日期：2025/11/30</div>
+                  <div>内容：文章里的单词可点击播放</div>
+                </div>
+              </div>
+            </div>
+            <div class="log-item">
+              <div class="mb-2">
+                <div>
+                  <div>日期：2025/11/29</div>
                   <div>内容：修改 Slider 组件显示bug，新增 IE 浏览器检测提示</div>
                 </div>
               </div>

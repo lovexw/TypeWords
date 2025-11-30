@@ -3,7 +3,7 @@ import { inject, onMounted, onUnmounted, watch } from "vue"
 import { Article, ArticleWord, PracticeArticleWordType, Sentence, ShortcutKey, Word } from "@/types/types.ts";
 import { useBaseStore } from "@/stores/base.ts";
 import { useSettingStore } from "@/stores/setting.ts";
-import { usePlayBeep, usePlayCorrect, usePlayKeyboardAudio } from "@/hooks/sound.ts";
+import { usePlayBeep, usePlayKeyboardAudio, usePlayWordAudio } from "@/hooks/sound.ts";
 import { emitter, EventKey, useEvents } from "@/utils/eventBus.ts";
 import { _dateFormat, _nextTick, isMobile, msToHourMinute, total } from "@/utils";
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css'
@@ -76,8 +76,9 @@ const currentIndex = $computed(() => {
 })
 
 const playBeep = usePlayBeep()
-const playCorrect = usePlayCorrect()
 const playKeyboardAudio = usePlayKeyboardAudio()
+const playWordAudio = usePlayWordAudio()
+
 const {
   toggleWordCollect,
 } = useWordOptions()
@@ -685,6 +686,7 @@ const currentPractice = inject('currentPractice', [])
                           &&'hover-show',
                           word.type === PracticeArticleWordType.Number && 'font-family text-xl'
                           ]"
+                          @click="playWordAudio(word.word)"
                     >
                       <TypingWord :word="word"
                                   :is-typing="true"
