@@ -1,0 +1,30 @@
+# Cloudflare Pages 配置文件
+# 此文件用于 Cloudflare Pages 的高级配置
+
+name = "typewords"
+compatibility_date = "2023-06-01"
+
+# 项目配置
+[env.production]
+vars = { NODE_VERSION = "18" }
+
+[env.preview] 
+vars = { NODE_VERSION = "18" }
+
+# 如果需要设置构建命令（可选，Cloudflare Pages 通常从 package.json 读取）
+# [env.production.build]
+# command = "npm run build"
+
+# 静态文件处理
+# 对于 SPA 应用，确保所有路由都指向 index.html
+# [[env.production.rules]]
+# include = "*.html"
+# header = [{key = "Cache-Control", value = "public, max-age=0, must-revalidate"}]
+
+# [[env.production.rules]] 
+# include = "*.js"
+# header = [{key = "Cache-Control", value = "public, max-age=31536000, immutable"}]
+
+# [[env.production.rules]]
+# include = "*.css" 
+# header = [{key = "Cache-Control", value = "public, max-age=31536000, immutable"}]
